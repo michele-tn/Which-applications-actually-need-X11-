@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><meta name="description" content="Interactive guide to finding X11 applications and verifying SSH forwarding on Ubuntu 22.04.5 LTS."><title>Investigate X11 · Ubuntu 22.04.5 LTS</title><style>
+:root{color-scheme:light;--bg:#f5f4ef;--paper:#fff;--ink:#182624;--muted:#566560;--line:#d9dfd8;--accent:#b83f1c;--tint:#fcece4;--green:#22644e;--nav:#152d29;--code:#142724;--shadow:0 16px 48px #162b2410}
+:root[data-theme=dark]{color-scheme:dark;--bg:#10231f;--paper:#19312b;--ink:#edf3eb;--muted:#bacbc0;--line:#365148;--accent:#ffac87;--tint:#48332a;--green:#a4dec2;--nav:#0b1916;--code:#091b16;--shadow:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}a{color:var(--accent);text-underline-offset:4px}button,input,select,textarea{font:inherit}button,a,input,select,summary,textarea{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:4px}button,.button{border:1px solid var(--line);border-radius:9px;padding:9px 15px;background:var(--paper);color:var(--ink);text-decoration:none;display:inline-block;font-weight:650}button:hover,.button:hover{border-color:var(--accent)}.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}.skip{position:fixed;left:12px;top:-100px;z-index:20;background:var(--paper);padding:12px}.skip:focus{top:10px}.topbar{position:sticky;top:0;z-index:10;background:var(--nav);color:#f2f6f0;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:16px 4vw}.brand{display:flex;align-items:center;gap:12px;font-weight:750;letter-spacing:.04em}.brand-icon{display:grid;place-items:center;border:1px solid #729487;width:38px;height:38px;border-radius:9px;font:700 15px monospace}.topbar small{color:#afc5ba;font-weight:400;letter-spacing:0}.top-actions{display:flex;gap:8px;align-items:center}.top-actions a,.top-actions button{background:transparent;border:1px solid #60776c;color:#f2f6f0;font-size:13px;padding:6px 11px;border-radius:7px;text-decoration:none}.layout{max-width:1500px;margin:auto;display:grid;grid-template-columns:235px minmax(0,1fr);gap:46px;padding:36px 4vw 70px}.sidebar{align-self:start;position:sticky;top:105px}.eyebrow{font:700 11px/1.5 system-ui;letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}.sidebar nav{display:grid;gap:5px;margin:18px 0 28px}.sidebar nav a{font-size:14px;padding:10px 12px;color:var(--muted);text-decoration:none;border-radius:7px;border-left:2px solid transparent}.sidebar nav a:hover,.sidebar nav a[aria-current]{background:var(--paper);color:var(--ink);border-left-color:var(--accent)}.sidebar nav span{font:12px monospace;color:var(--accent);margin-right:12px}.side-note{border-top:1px solid var(--line);padding-top:18px;font-size:13px;color:var(--muted)}.side-note strong{color:var(--ink)}main{min-width:0}.hero{padding:26px 0 34px}.pill{display:inline-block;border:1px solid var(--line);padding:5px 10px;border-radius:30px;font-size:11px;font-weight:750;letter-spacing:.05em;margin-right:6px}.hero h1{font-size:clamp(38px,4.7vw,68px);line-height:1.04;letter-spacing:-.055em;font-weight:750;margin:22px 0;max-width:850px}.hero h1 em{color:var(--accent);font-style:normal}.lead{font-size:18px;color:var(--muted);max-width:760px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}.architecture{display:grid;grid-template-columns:1fr 100px 1fr;align-items:center;background:var(--nav);color:#fff;border-radius:16px;padding:28px;margin:8px 0 28px;gap:15px}.machine{border:1px solid #5c7b6b;border-radius:10px;padding:18px}.machine small{display:block;color:#bad0c2;font-size:12px}.machine strong{display:block;font-size:20px;margin:5px 0}.machine code{font-size:12px;color:#bce6cd}.tunnel{text-align:center;font:12px monospace;color:#ffb38f}.tunnel span{display:block;font-size:30px;letter-spacing:5px}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px}.card h3{font-size:17px;margin:8px 0}.card p{font-size:14px;color:var(--muted);margin:0}.card .number{font:12px monospace;color:var(--accent)}section{margin-top:52px}.section-heading{display:flex;align-items:baseline;gap:15px;border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:23px}.section-heading span{font:13px monospace;color:var(--accent)}h2{font-size:28px;line-height:1.25;letter-spacing:-.025em;margin:0}h3{font-size:19px;margin:26px 0 8px}p{margin:12px 0}.muted{color:var(--muted)}.note{background:var(--tint);border-left:3px solid var(--accent);border-radius:0 9px 9px 0;padding:16px 20px;font-size:14px;margin:20px 0}.command{background:var(--code);border:1px solid #446257;border-radius:11px;margin:16px 0;overflow:hidden;color:#e5f1e9}.command-head{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:9px 15px;border-bottom:1px solid #365146;color:#b8d0c3;font:12px system-ui}.copy{color:#eff8f1;background:transparent;border:1px solid #688777;font-size:12px;padding:4px 10px;white-space:nowrap}pre{margin:0;padding:18px;overflow:auto;tab-size:2;line-height:1.7;font-size:13px}code{font-family:Consolas,'Liberation Mono',monospace;overflow-wrap:anywhere}p code,li code,td code{font-size:.88em;background:var(--tint);padding:2px 5px;border-radius:4px}pre code{overflow-wrap:normal}.source{font-size:12px;color:var(--muted)}.source a{color:var(--green)}.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:11px;margin:20px 0}table{border-collapse:collapse;width:100%;font-size:14px}th{text-align:left;background:var(--paper);color:var(--muted);font-weight:650}th,td{padding:14px 17px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}td:first-child{font-weight:650}details{border:1px solid var(--line);border-radius:10px;background:var(--paper);margin:10px 0;padding:0 18px}summary{cursor:pointer;padding:15px 0;font-weight:650}details>div{padding-bottom:16px}.tool-panel{border:1px solid var(--line);border-radius:15px;background:var(--paper);padding:25px;box-shadow:var(--shadow)}.tool-panel h3{margin-top:0}.fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}label{display:block;font-size:14px;font-weight:600}select,input[type=search],textarea{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:11px;margin-top:7px}select{min-height:48px}textarea{resize:vertical;min-height:125px}.result{border:1px solid var(--line);border-left:4px solid var(--green);border-radius:8px;padding:18px;margin-top:20px;background:var(--bg)}.result strong{display:block;color:var(--green);font-size:18px}.search-row{display:flex;gap:15px;align-items:end;flex-wrap:wrap;margin-bottom:20px}.search-row label{flex:1;min-width:190px}.filters{display:flex;gap:7px;flex-wrap:wrap}.filters button{font-size:13px}.filters button[aria-pressed=true]{background:var(--nav);color:#fff;border-color:var(--nav)}.badge{display:inline-block;padding:3px 8px;border-radius:5px;background:var(--tint);color:var(--accent);font:700 10px system-ui;letter-spacing:.05em}.catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.catalog .card h3{margin-top:12px}.checklist{display:grid;gap:10px;margin-top:18px}.checklist label{display:flex;align-items:start;gap:12px;padding:12px;background:var(--bg);border-radius:8px;font-weight:400}.checklist input{accent-color:var(--green);width:19px;height:19px;flex:none;margin-top:3px}progress{width:100%;height:10px;accent-color:var(--green)}.check-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.check-top h3{margin:0}.check-top span{color:var(--green);font:13px monospace}.report-actions{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap}.references{display:grid;grid-template-columns:1fr 1fr;gap:9px;font-size:13px}.references a{padding:12px;border:1px solid var(--line);border-radius:8px;color:var(--green);text-decoration:none}footer{margin-top:45px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:12px}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 23px;border-radius:9px;z-index:30;max-width:90vw;box-shadow:var(--shadow)}[hidden]{display:none!important}.js-only{display:none}.js .js-only{display:block}.js .filters,.js .report-actions{display:flex}.js .copy{display:inline-block}noscript p{padding:18px;background:var(--tint)}
+@media(max-width:1050px){.layout{grid-template-columns:180px minmax(0,1fr);gap:25px}.cards{grid-template-columns:1fr}.card{padding:18px}.split{grid-template-columns:1fr}.architecture{grid-template-columns:1fr 65px 1fr;padding:18px;gap:10px}.machine{padding:12px}.machine strong{font-size:17px}}
+@media(max-width:740px){html{scroll-padding-top:100px}.topbar{padding:12px 5vw;flex-wrap:wrap}.brand small{display:none}.layout{display:block;padding:20px 5vw 50px}.sidebar{position:static}.sidebar>.eyebrow,.side-note{display:none}.sidebar nav{display:flex;overflow:auto;gap:5px;margin:0;padding-bottom:10px}.sidebar nav a{white-space:nowrap;padding:8px;font-size:12px}.sidebar nav span{margin-right:5px}.hero{padding-top:25px}.hero h1{font-size:43px}.hero .lead{font-size:16px}.architecture{grid-template-columns:1fr}.tunnel span{transform:rotate(90deg);font-size:24px}.machine strong{font-size:20px}.cards,.catalog,.fields,.references{grid-template-columns:1fr}.section-heading h2{font-size:25px}.tool-panel{padding:18px}.top-actions button,.top-actions a{font-size:12px;padding:5px 8px}section{margin-top:38px}pre{font-size:12px}.hero-actions .button{font-size:14px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+@media print{html{scroll-padding:0}body{background:#fff;color:#111;font-size:11pt}.topbar,.sidebar,.hero-actions,.copy,.js-only,.toast,.skip{display:none!important}.layout{display:block;padding:0;max-width:none}.hero h1{font-size:36pt}.hero{padding:0}section{margin-top:25px}.architecture,.command{background:#f3f3f3;color:#111}.machine,.command-head{color:#111;border-color:#bbb}.machine small,.machine code,.tunnel{color:#333}pre{white-space:pre-wrap;overflow-wrap:anywhere}.card,.tool-panel,details,.note{box-shadow:none;break-inside:avoid}.table-wrap{overflow:visible}a{color:#333}.references{display:block}.references a{display:block;border:0;padding:2px}.references a:after{content:' (' attr(href) ')';font-size:8pt;overflow-wrap:anywhere}h2,h3,summary{break-after:avoid}.checklist label{background:#fff}.catalog [hidden]{display:block!important}.result{background:white}.fields{display:none}.command-head{border-color:#aaa}.hero h1 em,.eyebrow,.section-heading span{color:#333}}
+</style></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><div class="brand"><span class="brand-icon" aria-hidden="true">X11</span><div>LINUX FIELD GUIDE <small> / 22.04 LTS</small></div></div><div class="top-actions"><a href="guida-x11-it.html" lang="it" hreflang="it">Italiano ↗</a><button id="theme" class="js-only" type="button" aria-pressed="false">Dark theme</button><button id="print" class="js-only" type="button">Print / PDF</button></div></header>
+<div class="layout"><aside class="sidebar"><div class="eyebrow">Your investigation path</div><nav aria-label="Guide contents"><a href="#start"><span>01</span>Before you start</a><a href="#setup"><span>02</span>Prepare the environment</a><a href="#discover"><span>03</span>Find applications</a><a href="#observe"><span>04</span>Observe X11</a><a href="#verify"><span>05</span>Verify over SSH</a><a href="#troubleshoot"><span>06</span>Troubleshoot</a><a href="#report"><span>07</span>Save your findings</a><a href="#sources"><span>08</span>Technical sources</a></nav><div class="side-note"><strong>Ubuntu 22.04.5 LTS</strong><br>Jammy Jellyfish<br><br>From clue to evidence.<br>Commands, interpretation and limitations at each step.<br><br>Standalone HTML · Offline</div></aside>
+<main id="main"><div class="hero"><span class="pill">UBUNTU 22.04.5 LTS</span><span class="pill">PRACTICAL GUIDE</span><h1>Which applications<br>actually need <em>X11?</em></h1><p class="lead">Find graphical applications, identify their active backend and verify when SSH forwarding is needed. A practical path from initial clues to a window on your screen.</p><div class="hero-actions"><a class="button primary" href="#discover">Start investigating →</a><a class="button" href="#assistant">Assess your scenario</a></div></div>
+<noscript><p>Content and commands work without JavaScript. Enable JavaScript for the interactive assessment, filters, copy buttons and saved notes.</p></noscript>
+<div class="architecture" role="img" aria-label="The application runs on the remote Ubuntu host. X11 travels through the SSH tunnel; its window appears on the local computer’s X server."><div class="machine"><small>REMOTE HOST</small><strong>The app runs here</strong><code>Ubuntu → xclock</code></div><div class="tunnel">SSH / X11<span aria-hidden="true">→</span></div><div class="machine"><small>LOCAL COMPUTER</small><strong>The window appears here</strong><code>X server / Xwayland</code></div></div>
+
+<section id="start"><div class="section-heading"><span>01</span><h2>Before you start</h2></div><p><strong>There is no universal list of applications that “require X11 forwarding”.</strong> The need depends on where a program runs, its backend and the selected mode. An X11 GUI launched over SSH and displayed on your local computer using the X11 tunnel needs forwarding; a text command does not.</p>
+<div class="cards"><article class="card"><span class="number">01 / CLUE</span><h3>Installed application</h3><p>Launchers, packages and libraries help find candidates. They do not prove the active backend.</p></article><article class="card"><span class="number">02 / OBSERVATION</span><h3>X11 window</h3><p>A window identified by xprop demonstrates X11 usage in that session and mode.</p></article><article class="card"><span class="number">03 / VERIFICATION</span><h3>Successful remote launch</h3><p>A test through SSH confirms that the particular GUI works with that tunnel and configuration.</p></article></div>
+<div class="tool-panel js-only" id="assistant" style="margin-top:24px"><h3>Does your scenario need it?</h3><p class="muted">This assessment uses your answers; it does not scan your computer.</p><div class="fields"><label for="location">Where does the program run?<select id="location"><option value="remote">Remote host, window wanted here</option><option value="local">On the computer I am using</option></select></label><label for="backend">Which mode are you using?<select id="backend"><option value="unknown">I do not know yet</option><option value="x11">X11 GUI, including Xwayland</option><option value="wayland">Wayland-only GUI</option><option value="cli">Terminal / headless without a GUI</option></select></label></div><div id="diagnosis" class="result" role="status" aria-live="polite"></div></div></section>
+
+<section id="setup"><div class="section-heading"><span>02</span><h2>Prepare the environment</h2></div><p>The commands below target Bash on Ubuntu. The <strong>local computer</strong> is the one in front of you; the <strong>remote host</strong> runs the program. Open a terminal in the environment shown above each command.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>cat /etc/os-release
+printf 'session=%s\nDISPLAY=%s\nWAYLAND_DISPLAY=%s\n' \
+  &quot;$XDG_SESSION_TYPE&quot; &quot;$DISPLAY&quot; &quot;$WAYLAND_DISPLAY&quot;</code></pre></div>
+<p>Check <code>VERSION_ID="22.04"</code> and the release name; an updated system may report a different maintenance level. On the desktop, <code>x11</code> or <code>wayland</code> describes the session, not every program. In SSH, the session type may be empty or <code>tty</code>.</p>
+<h3>Investigation tools</h3><p>This installation changes system packages and requires administrator privileges and repository access. Install x11-utils on the desktop you want to inspect too, if it differs from the remote host.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>sudo apt update
+sudo apt install x11-utils x11-apps xauth</code></pre></div>
+<div class="split"><article class="card"><h3>Local side</h3><p>You need an SSH client with X11 support and a working X server. On an Ubuntu desktop this can be Xorg or Xwayland in a Wayland session. Windows and macOS need a compatible X server and the chosen SSH client configured; the Bash commands here do not configure those systems.</p></article><article class="card"><h3>Remote side</h3><p>You need the application, its dependencies, xauth and a configured OpenSSH server. A complete desktop or a running remote Xorg server is not required solely for forwarding. If SSH is absent, installing openssh-server enables a remote-access service and should be planned separately.</p></article></div><p class="source">References: <a href="https://manpages.ubuntu.com/manpages/jammy/man1/ssh.1.html">ssh(1) · Ubuntu Jammy</a> · <a href="https://wayland.freedesktop.org/docs/book/Xwayland.html">Xwayland · Wayland documentation</a></p></section>
+
+<section id="discover"><div class="section-heading"><span>03</span><h2>Find applications</h2></div><div class="note"><strong>Goal: find software already present.</strong> Launcher and package searches do not install software, require sudo or launch applications. For ldd, follow the precautions below. Run the searches on the Ubuntu computer that will run the GUI, before installing diagnostic tools if you want a snapshot of the initial state.</div>
+<div id="original-commands">
+<h3>The three quick commands: usage and interpretation</h3>
+<p>Here they are in their original form, to run in Bash on the Ubuntu host you want to inspect. They are initial investigation tools: interpret their results before testing forwarding. Variants and a structured inventory follow below.</p>
+<h3>1. Extract names from desktop launchers</h3>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>grep -r &quot;Name=&quot; /usr/share/applications/*.desktop | cut -d'=' -f2-</code></pre></div>
+<p><strong>How it works:</strong> Bash expands <code>*.desktop</code> to files directly inside /usr/share/applications. grep selects lines containing <code>Name=</code>; cut uses <code>=</code> as the delimiter and keeps everything from the second field onward. The result is a list of values, not executable commands.</p>
+<p><strong>Limitations:</strong> the filter may include <code>GenericName=</code> and secondary action names; it does not select <code>Name[it]=</code>. It loses the file association and can produce duplicates. With this glob, <code>-r</code> does not make the search a complete subdirectory inventory. User launchers and Snap/Flatpak launchers in other locations are missed. A returned name does not guarantee an X11 GUI; no output does not prove that no GUIs are installed.</p>
+<p>A more selective variant for the Name key, still restricted to this directory and unable to distinguish Desktop Entry/Action groups:</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>grep -h '^Name=' /usr/share/applications/*.desktop | cut -d'=' -f2- | sort -u</code></pre></div>
+<p class="source"><a href="https://specifications.freedesktop.org/desktop-entry/latest/recognized-keys.html">Desktop Entry Specification · Name, Type, Exec, Terminal</a></p>
+<div id="launcher-paths" class="tool-panel"><h3>From the name to the path and launch command</h3>
+<p>In your example, “New Window”, “New Session” and “Preferences” may be launcher actions; “Process Viewer” and “Text Editor” may be GenericName descriptions. The list alone cannot associate these lines with an exact file. The following search reads only the Desktop Entry group and retains the full path.</p>
+<h3 id="save-python">Copy the complete script into a Python file</h3>
+<p>Create a text file named <code>inventory-launchers.py</code>, press <strong>Copy</strong> on the block below and paste its contents into your editor. Save as UTF-8, preserving indentation and the <code>.py</code> extension (not <code>.py.txt</code>). The block contains only Python, with no Bash commands or PY delimiters. The full script is included in the offline guide too.</p>
+<div id="python-source-block">
+<div class="command"><div class="command-head"><span>inventory-launchers.py · Python 3</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Python 3"><code>&quot;&quot;&quot;Inspect desktop launchers without running applications or shell commands.&quot;&quot;&quot;
+
+from __future__ import annotations
+
+import argparse
+import configparser
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import sys
+
+
+def launcher_directories() -&gt; list[Path]:
+    &quot;&quot;&quot;Return common and configured XDG application directories.&quot;&quot;&quot;
+    home = Path.home()
+    data_home = os.environ.get(&quot;XDG_DATA_HOME&quot;) or str(home / &quot;.local/share&quot;)
+    data_dirs = os.environ.get(&quot;XDG_DATA_DIRS&quot;) or &quot;/usr/local/share:/usr/share&quot;
+    roots = [Path(data_home), *(Path(p) for p in data_dirs.split(&quot;:&quot;) if p)]
+    roots += [Path(&quot;/var/lib/snapd/desktop&quot;), Path(&quot;/var/lib/flatpak/exports/share&quot;),
+              home / &quot;.local/share/flatpak/exports/share&quot;]
+    return list(dict.fromkeys(root / &quot;applications&quot; for root in roots if root.is_absolute()))
+
+
+def read_entry(path: Path) -&gt; dict[str, str]:
+    &quot;&quot;&quot;Read only the main Desktop Entry group, preserving raw Exec syntax.&quot;&quot;&quot;
+    parser = configparser.ConfigParser(interpolation=None, delimiters=(&quot;=&quot;,), strict=True)
+    parser.optionxform = str
+    with path.open(encoding=&quot;utf-8-sig&quot;) as source:
+        parser.read_file(source)
+    return dict(parser.items(&quot;Desktop Entry&quot;)) if parser.has_section(&quot;Desktop Entry&quot;) else {}
+
+
+def executable_path(exec_value: str) -&gt; str:
+    &quot;&quot;&quot;Resolve a simple first executable; leave complex Exec quoting unresolved.&quot;&quot;&quot;
+    match = re.match(r'''^(?:&quot;([^&quot;\\%`$]+)&quot;|([^\s&quot;'\\%`$&gt;&lt;|&amp;;()=]+))(?=\s|$)''', exec_value.strip())
+    if not match:
+        return &quot;&quot;
+    first = match.group(1) or match.group(2)
+    if &quot;/&quot; in first and not os.path.isabs(first):
+        return &quot;&quot;
+    located = shutil.which(first)
+    return os.path.abspath(located) if located else &quot;&quot;
+
+
+def printable(value: str) -&gt; str:
+    &quot;&quot;&quot;Escape control characters so metadata cannot manipulate terminal output.&quot;&quot;&quot;
+    return &quot;&quot;.join(c if c.isprintable() else f&quot;\\x{ord(c):02x}&quot; for c in value)
+
+
+def describe(path: Path, entry: dict[str, str], italian: bool) -&gt; str:
+    &quot;&quot;&quot;Format paths, raw Exec and an explicit launcher command as a readable card.&quot;&quot;&quot;
+    def text(it: str, en: str) -&gt; str:
+        return it if italian else en
+
+    path = path.absolute()
+    raw = entry.get(&quot;Exec&quot;, &quot;&quot;)
+    executable = executable_path(raw)
+    gio = shutil.which(&quot;gio&quot;)
+    launch = shlex.join([os.path.abspath(gio), &quot;launch&quot;, str(path)]) if gio else text(
+        &quot;gio non trovato: richiede libglib2.0-bin&quot;, &quot;gio not found: requires libglib2.0-bin&quot;)
+    fields = [
+        (&quot;NAME&quot;, entry.get(&quot;Name&quot;, path.stem)),
+        (&quot;DESKTOP FILE&quot;, str(path)),
+        (&quot;EXEC (RAW)&quot;, raw or text(&quot;assente: controllare D-Bus&quot;, &quot;absent: check D-Bus&quot;)),
+        (&quot;EXECUTABLE&quot;, executable or text(&quot;non risolto: assente o sintassi complessa&quot;, &quot;unresolved: missing or complex syntax&quot;)),
+        (&quot;TRYEXEC&quot;, entry.get(&quot;TryExec&quot;, &quot;—&quot;)),
+        (&quot;TERMINAL&quot;, entry.get(&quot;Terminal&quot;, &quot;false&quot;)),
+        (&quot;DBUS ACTIVATABLE&quot;, entry.get(&quot;DBusActivatable&quot;, &quot;false&quot;)),
+        (&quot;NO DISPLAY&quot;, entry.get(&quot;NoDisplay&quot;, &quot;false&quot;)),
+        (&quot;WORKING DIR&quot;, entry.get(&quot;Path&quot;, &quot;—&quot;)),
+        (&quot;LAUNCH&quot;, launch),
+    ]
+    return &quot;\n&quot;.join(f&quot;{label:18} {printable(value)}&quot; for label, value in fields)
+
+
+def main() -&gt; None:
+    &quot;&quot;&quot;Print candidate launchers; --match filters name, command and desktop path.&quot;&quot;&quot;
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(&quot;--lang&quot;, choices=(&quot;it&quot;, &quot;en&quot;), default=&quot;it&quot;)
+    parser.add_argument(&quot;--match&quot;, default=&quot;&quot;)
+    parser.add_argument(&quot;--directory&quot;, type=Path, action=&quot;append&quot;, help=&quot;Scan only these directories&quot;)
+    args = parser.parse_args()
+    candidates: set[Path] = set()
+    for root in args.directory or launcher_directories():
+        if root.is_dir():
+            candidates.update(p.absolute() for p in root.rglob(&quot;*.desktop&quot;) if p.is_file())
+    found = 0
+    for path in sorted(candidates):
+        try:
+            entry = read_entry(path)
+        except (OSError, UnicodeError, configparser.Error) as error:
+            print(f&quot;SKIP {printable(str(path))}: {printable(str(error))}&quot;, file=sys.stderr)
+            continue
+        if entry.get(&quot;Type&quot;) != &quot;Application&quot; or entry.get(&quot;Hidden&quot;) == &quot;true&quot;:
+            continue
+        haystack = &quot; &quot;.join([entry.get(&quot;Name&quot;, &quot;&quot;), entry.get(&quot;Exec&quot;, &quot;&quot;), str(path)])
+        if args.match.casefold() not in haystack.casefold():
+            continue
+        found += 1
+        print(f&quot;\n[{found:03}] &quot; + &quot;─&quot; * 55)
+        print(describe(path, entry, args.lang == &quot;it&quot;))
+    print(f&quot;\nTOTAL: {found}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></div>
+</div>
+<p>On the Ubuntu computer you want to inspect, open a terminal in the folder where you saved the file and run one of the following two lines. If you created the file on another computer, transfer it to Ubuntu first. It requires Python 3 and does not launch applications during the search.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>python3 inventory-launchers.py --lang en
+python3 inventory-launchers.py --lang en --match tilix</code></pre></div>
+<details><summary>Alternative: run the search without saving a file</summary><div><p>Paste this second block into the Bash terminal, including the final PY line. Do not paste it into the .py file.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>python3 - --lang en &lt;&lt;'PY'
+&quot;&quot;&quot;Inspect desktop launchers without running applications or shell commands.&quot;&quot;&quot;
+
+from __future__ import annotations
+
+import argparse
+import configparser
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import sys
+
+
+def launcher_directories() -&gt; list[Path]:
+    &quot;&quot;&quot;Return common and configured XDG application directories.&quot;&quot;&quot;
+    home = Path.home()
+    data_home = os.environ.get(&quot;XDG_DATA_HOME&quot;) or str(home / &quot;.local/share&quot;)
+    data_dirs = os.environ.get(&quot;XDG_DATA_DIRS&quot;) or &quot;/usr/local/share:/usr/share&quot;
+    roots = [Path(data_home), *(Path(p) for p in data_dirs.split(&quot;:&quot;) if p)]
+    roots += [Path(&quot;/var/lib/snapd/desktop&quot;), Path(&quot;/var/lib/flatpak/exports/share&quot;),
+              home / &quot;.local/share/flatpak/exports/share&quot;]
+    return list(dict.fromkeys(root / &quot;applications&quot; for root in roots if root.is_absolute()))
+
+
+def read_entry(path: Path) -&gt; dict[str, str]:
+    &quot;&quot;&quot;Read only the main Desktop Entry group, preserving raw Exec syntax.&quot;&quot;&quot;
+    parser = configparser.ConfigParser(interpolation=None, delimiters=(&quot;=&quot;,), strict=True)
+    parser.optionxform = str
+    with path.open(encoding=&quot;utf-8-sig&quot;) as source:
+        parser.read_file(source)
+    return dict(parser.items(&quot;Desktop Entry&quot;)) if parser.has_section(&quot;Desktop Entry&quot;) else {}
+
+
+def executable_path(exec_value: str) -&gt; str:
+    &quot;&quot;&quot;Resolve a simple first executable; leave complex Exec quoting unresolved.&quot;&quot;&quot;
+    match = re.match(r'''^(?:&quot;([^&quot;\\%`$]+)&quot;|([^\s&quot;'\\%`$&gt;&lt;|&amp;;()=]+))(?=\s|$)''', exec_value.strip())
+    if not match:
+        return &quot;&quot;
+    first = match.group(1) or match.group(2)
+    if &quot;/&quot; in first and not os.path.isabs(first):
+        return &quot;&quot;
+    located = shutil.which(first)
+    return os.path.abspath(located) if located else &quot;&quot;
+
+
+def printable(value: str) -&gt; str:
+    &quot;&quot;&quot;Escape control characters so metadata cannot manipulate terminal output.&quot;&quot;&quot;
+    return &quot;&quot;.join(c if c.isprintable() else f&quot;\\x{ord(c):02x}&quot; for c in value)
+
+
+def describe(path: Path, entry: dict[str, str], italian: bool) -&gt; str:
+    &quot;&quot;&quot;Format paths, raw Exec and an explicit launcher command as a readable card.&quot;&quot;&quot;
+    def text(it: str, en: str) -&gt; str:
+        return it if italian else en
+
+    path = path.absolute()
+    raw = entry.get(&quot;Exec&quot;, &quot;&quot;)
+    executable = executable_path(raw)
+    gio = shutil.which(&quot;gio&quot;)
+    launch = shlex.join([os.path.abspath(gio), &quot;launch&quot;, str(path)]) if gio else text(
+        &quot;gio non trovato: richiede libglib2.0-bin&quot;, &quot;gio not found: requires libglib2.0-bin&quot;)
+    fields = [
+        (&quot;NAME&quot;, entry.get(&quot;Name&quot;, path.stem)),
+        (&quot;DESKTOP FILE&quot;, str(path)),
+        (&quot;EXEC (RAW)&quot;, raw or text(&quot;assente: controllare D-Bus&quot;, &quot;absent: check D-Bus&quot;)),
+        (&quot;EXECUTABLE&quot;, executable or text(&quot;non risolto: assente o sintassi complessa&quot;, &quot;unresolved: missing or complex syntax&quot;)),
+        (&quot;TRYEXEC&quot;, entry.get(&quot;TryExec&quot;, &quot;—&quot;)),
+        (&quot;TERMINAL&quot;, entry.get(&quot;Terminal&quot;, &quot;false&quot;)),
+        (&quot;DBUS ACTIVATABLE&quot;, entry.get(&quot;DBusActivatable&quot;, &quot;false&quot;)),
+        (&quot;NO DISPLAY&quot;, entry.get(&quot;NoDisplay&quot;, &quot;false&quot;)),
+        (&quot;WORKING DIR&quot;, entry.get(&quot;Path&quot;, &quot;—&quot;)),
+        (&quot;LAUNCH&quot;, launch),
+    ]
+    return &quot;\n&quot;.join(f&quot;{label:18} {printable(value)}&quot; for label, value in fields)
+
+
+def main() -&gt; None:
+    &quot;&quot;&quot;Print candidate launchers; --match filters name, command and desktop path.&quot;&quot;&quot;
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(&quot;--lang&quot;, choices=(&quot;it&quot;, &quot;en&quot;), default=&quot;it&quot;)
+    parser.add_argument(&quot;--match&quot;, default=&quot;&quot;)
+    parser.add_argument(&quot;--directory&quot;, type=Path, action=&quot;append&quot;, help=&quot;Scan only these directories&quot;)
+    args = parser.parse_args()
+    candidates: set[Path] = set()
+    for root in args.directory or launcher_directories():
+        if root.is_dir():
+            candidates.update(p.absolute() for p in root.rglob(&quot;*.desktop&quot;) if p.is_file())
+    found = 0
+    for path in sorted(candidates):
+        try:
+            entry = read_entry(path)
+        except (OSError, UnicodeError, configparser.Error) as error:
+            print(f&quot;SKIP {printable(str(path))}: {printable(str(error))}&quot;, file=sys.stderr)
+            continue
+        if entry.get(&quot;Type&quot;) != &quot;Application&quot; or entry.get(&quot;Hidden&quot;) == &quot;true&quot;:
+            continue
+        haystack = &quot; &quot;.join([entry.get(&quot;Name&quot;, &quot;&quot;), entry.get(&quot;Exec&quot;, &quot;&quot;), str(path)])
+        if args.match.casefold() not in haystack.casefold():
+            continue
+        found += 1
+        print(f&quot;\n[{found:03}] &quot; + &quot;─&quot; * 55)
+        print(describe(path, entry, args.lang == &quot;it&quot;))
+    print(f&quot;\nTOTAL: {found}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+PY</code></pre></div>
+</div></details>
+<p>The two lines are alternatives: all entries, or only those matching tilix. Change --match for BleachBit, Stacer or TigerVNC. Run as the user who will use the applications: root has a different HOME, PATH and personal launchers.</p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>DESKTOP FILE</td><td>Absolute path of the launcher actually read.</td></tr>
+<tr><td>EXEC (RAW)</td><td>Original Exec entry, including arguments and field codes. Do not automatically paste it into the shell.</td></tr>
+<tr><td>EXECUTABLE</td><td>Path of the first executable resolved in the current PATH, when syntax is simple. It may be env, pkexec, snap or a wrapper, not the final application. Symbolic links are not dereferenced.</td></tr>
+<tr><td>LAUNCH</td><td>Complete command asking gio to launch that desktop file while preserving its semantics. It is printed, not executed. It does not guarantee launch or forwarding.</td></tr>
+<tr><td>TERMINAL / DBUS ACTIVATABLE</td><td>Identify terminal launching and possible D-Bus activation. Terminal=true entries are retained to identify Htop/Vim without confusing them with X11 GUIs.</td></tr></tbody></table></div>
+<p><strong>Launching over SSH:</strong> after verifying xclock, copy only the LAUNCH line for your chosen trusted program into the same session. gio interprets the launcher; D-Bus, existing instances, permissions and missing terminals can still prevent launching or reuse another session. For the “as root” variant, inspect Exec: privilege elevation is not required for a normal X11 test.</p>
+<p class="muted">Declared limitations: a per-file inventory, not a menu reconstruction. It retains NoDisplay, does not resolve user/system overrides and does not validate TryExec. The parser keeps the base name and reports Exec without decoding escapes. Complex syntax or missing binaries remain “unresolved”, without inventing paths. The card report is not TSV: do not paste it into the TSV importer below.</p>
+<p>If <code>gio</code> is missing, its Ubuntu package is <code>libglib2.0-bin</code>. Installing it with <code>sudo apt install libglib2.0-bin</code> changes the system; it is not needed to collect metadata.</p>
+<p class="source"><a href="https://manpages.ubuntu.com/manpages/jammy/man1/gio.1.html">gio(1) · Ubuntu Jammy</a> · <a href="https://specifications.freedesktop.org/desktop-entry/latest/exec-variables.html">Desktop Entry · Exec</a></p></div>
+<h3>2. Look for gedit’s X11 dependencies</h3>
+<div class="note">Use ldd only on a trusted executable. This example assumes that gedit and which are available and that the resolved path is a dynamic executable, not a wrapper. ldd can cause code execution: do not use it on unknown files.</div>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>ldd $(which gedit) | grep -i &quot;libX11\|libxcb&quot;</code></pre></div>
+<p><strong>How it works:</strong> <code>$(which gedit)</code> is replaced with the path to gedit; ldd lists resolved dynamic dependencies. <code>grep -i</code> ignores case and, with Ubuntu’s GNU grep, <code>\|</code> means “or”: lines containing libX11 or libxcb are retained.</p>
+<p><strong>Reading the result:</strong> a line such as <code>libX11.so.6 =&gt; …</code> is evidence of a dependency, possibly indirect. <code>not found</code> instead indicates an unresolved dependency. Empty output may be caused by plugins, wrappers, a missing program or errors: it does not prove X11 incompatibility. A match does not prove the active backend or successful operation over SSH either.</p>
+<p>A variant with a presence check, a quoted path and explicit <code>grep -E</code> alternation. Still check the file type and origin first; replace gedit with the candidate application.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>app_path=$(command -v gedit)
+if [ -n &quot;$app_path&quot; ]; then
+  ldd &quot;$app_path&quot; | grep -Ei 'libX11|libxcb'
+else
+  printf '%s\n' 'gedit: command not found in PATH' &gt;&amp;2
+fi</code></pre></div>
+<p class="source"><a href="https://manpages.ubuntu.com/manpages/jammy/man1/ldd.1.html">ldd(1) · Ubuntu Jammy</a></p>
+<h3>3. Find GTK, Qt and X server components in package records</h3>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>dpkg -l | grep -E &quot;libgtk|libqt|xserver&quot;</code></pre></div>
+<p><strong>How it works:</strong> dpkg lists package records; <code>grep -E</code> retains lines containing libgtk, libqt or xserver. Matching is case-sensitive and applies to the entire line, including descriptions.</p>
+<p><strong>Reading the result:</strong> in the first column, <code>ii</code> normally indicates an installed package; <code>rc</code> a removed package with residual configuration files. The original command does not filter status. It mainly shows graphics components, not a complete list of applications depending on them, and does not cover Snap/Flatpak. No output does not rule out X11 applications.</p>
+<p>A variant restricted to rows with <code>ii</code> status; to find applications through their dependencies, use the Depends-field filter further below instead.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>dpkg -l | awk '$1 == &quot;ii&quot;' | grep -E &quot;libgtk|libqt|xserver&quot;</code></pre></div>
+<div id="package-readable"><h3>A readable table of installed packages</h3>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>{
+  printf 'PACKAGE\tVERSION\tARCH\tDESCRIPTION\n'
+  dpkg-query -W -f='${db:Status-Status}\t${binary:Package}\t${Version}\t${Architecture}\t${binary:Summary}\n' |
+    awk -F '\t' '$1 == &quot;installed&quot; &amp;&amp; $2 ~ /(libgtk|libqt|xserver)/ {
+      print $2 &quot;\t&quot; $3 &quot;\t&quot; $4 &quot;\t&quot; $5
+    }' | sort -f
+} | column -t -s &quot;$(printf '\t')&quot;</code></pre></div>
+<p>Headers distinguish package, version, architecture and short description. Only packages with installed status are selected; the search targets package names, not descriptions. column aligns tabs without truncating versions or names. Results can therefore differ from the original grep over whole lines.</p>
+<p>If <code>column</code> is unavailable, remove <code>| column …</code> to obtain TSV; Ubuntu provides column in <code>bsdextrautils</code>. On a narrow terminal, use the card report below to avoid a very wide table.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>dpkg-query -W -f='${db:Status-Status}\t${binary:Package}\t${Version}\t${Architecture}\t${binary:Summary}\n' |
+  awk -F '\t' '$1 == &quot;installed&quot; &amp;&amp; $2 ~ /(libgtk|libqt|xserver)/ {
+    printf &quot;\nPACKAGE     %s\nVERSION     %s\nARCH        %s\nDESCRIPTION %s\n&quot;, $2, $3, $4, $5
+  }'</code></pre></div>
+<p><strong>Interpreting your output:</strong> the supplied rows show installed GTK/Qt components and x11-xserver-utils. They do not by themselves identify launchable GUIs. Use the launcher search to obtain paths for Tilix, Stacer or TigerVNC; use the Depends-field search to connect packages with libraries.</p>
+<p class="source"><a href="https://manpages.ubuntu.com/manpages/jammy/man1/dpkg-query.1.html">dpkg-query(1)</a> · <a href="https://manpages.ubuntu.com/manpages/jammy/man1/column.1.html">column(1) · Ubuntu Jammy</a></p></div>
+<p class="source"><a href="https://manpages.ubuntu.com/manpages/jammy/man1/dpkg-query.1.html">dpkg-query(1) · Ubuntu Jammy</a></p>
+</div>
+<h3>Quick search: which programs are already available?</h3>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>for app in xclock xeyes xterm gedit mousepad zenity gimp inkscape \
+  libreoffice vlc firefox; do
+  app_path=$(command -v &quot;$app&quot;) || continue
+  printf '%-14s %s\n' &quot;$app&quot; &quot;$app_path&quot;
+done</code></pre></div>
+<p>Each row identifies a command found in the user’s PATH, not proven X11 compatibility. This is deliberately a sample list: empty output does not mean all GUIs are absent. A path may be a wrapper, including Snap; check the launcher and the relevant package manager.</p>
+<h3>Structured inventory of desktop candidates</h3>
+<p>The following command produces tab-separated rows (TSV): it reads only the main Desktop Entry group and excludes entries with a Type other than Application, Hidden=true or Terminal=true. It never executes Exec or TryExec.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>printf 'Name\tExec\tTerminal\tTryExec\tDesktopFile\n'
+for dir in /usr/share/applications /usr/local/share/applications \
+  &quot;${XDG_DATA_HOME:-$HOME/.local/share}/applications&quot; \
+  /var/lib/snapd/desktop/applications \
+  /var/lib/flatpak/exports/share/applications \
+  &quot;$HOME/.local/share/flatpak/exports/share/applications&quot;; do
+  [ -d &quot;$dir&quot; ] || continue
+  find -L &quot;$dir&quot; -type f -name '*.desktop' -exec awk '
+    /^\[Desktop Entry\]\r?$/ { main=1; next }
+    /^\[/ { main=0 }
+    main &amp;&amp; /^[A-Za-z]+=/ {
+      key=$0; sub(/=.*/, &quot;&quot;, key)
+      value=$0; sub(/^[^=]*=/, &quot;&quot;, value); sub(/\r$/, &quot;&quot;, value)
+      gsub(/\t/, &quot; &quot;, value); field[key]=value
+    }
+    END {
+      if (field[&quot;Type&quot;] == &quot;Application&quot; &amp;&amp; field[&quot;Hidden&quot;] != &quot;true&quot; &amp;&amp;
+          field[&quot;Terminal&quot;] != &quot;true&quot;) {
+        printf &quot;%s\t%s\t%s\t%s\t%s\n&quot;, field[&quot;Name&quot;], field[&quot;Exec&quot;],
+          field[&quot;Terminal&quot;], field[&quot;TryExec&quot;], FILENAME
+      }
+    }' {} \;
+done</code></pre></div>
+<p>It keeps NoDisplay entries and launchers without Exec so that D-Bus-activated candidates are not lost. Name is the base name, not the desktop translation. The filter does not prove that a window exists or that the program is correctly installed.</p>
+<p class="muted">Limitations: this is a per-file inventory, not a reconstruction of the menu. It may contain duplicate or stale launchers; it does not resolve user/system override precedence, OnlyShowIn/NotShowIn or all custom XDG_DATA_DIRS locations. Excluding Terminal=true can omit programs with mixed modes.</p>
+<div class="tool-panel js-only" id="inventory-panel"><h3>Explore your inventory</h3><p>Paste the TSV output of the previous command, including its header. Data stays on this page: it is neither uploaded nor saved automatically. Do not paste output from the other commands here.</p><label for="inventory-input">Ubuntu terminal output</label><textarea id="inventory-input" spellcheck="false" placeholder="Name&#9;Exec&#9;Terminal&#9;TryExec&#9;DesktopFile"></textarea><button id="inventory-load" type="button">Read inventory</button><label for="inventory-search">Search pasted results<input type="search" id="inventory-search" placeholder="Name, command or path…"></label><p id="inventory-status" role="status">No inventory loaded.</p><div class="table-wrap" id="inventory-output" hidden><table><caption>Imported candidates — X11 compatibility unverified</caption><thead><tr><th>Name</th><th>Exec</th><th>Terminal</th><th>TryExec</th><th>DesktopFile</th></tr></thead><tbody id="inventory-body"></tbody></table></div></div>
+<h3>Installed packages with graphics dependencies</h3>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>dpkg-query -W -f='${db:Status-Status}\t${binary:Package}\t${Version}\t${Depends}\n' |
+  awk -F '\t' '$1 == &quot;installed&quot; &amp;&amp;
+    $4 ~ /(^|[ ,|])(libx11-6|libxcb1|libgtk-3-0|libgtk2.0-0|libgtk-4-1|libqt5gui5|libqt5widgets5|libqt6gui6|libqt6widgets6)([ :,(|]|$)/ {
+      print $2 &quot;\t&quot; $3 &quot;\t&quot; $4
+    }'</code></pre></div>
+<p>This searches the Depends field of actually installed packages, rather than just package names. Libraries or components without a user interface may appear: inspect the candidates. The filter is partial (declared direct dependencies); it can miss transitive dependencies, plugins and other toolkits. It does not cover the contents of Snap, Flatpak or AppImage.</p>
+<p class="source"><a href="https://manpages.ubuntu.com/manpages/jammy/man1/dpkg-query.1.html">dpkg-query(1) · Ubuntu Jammy</a></p>
+<details><summary>Why the three suggested commands cannot provide certainty</summary><div><ul><li><code>grep -r "Name=" …</code> may include GenericName and action names, while missing launchers in other locations. A .desktop entry can launch a service or a text program.</li><li><code>ldd … | grep libX11</code> shows a library dependency: it proves neither the selected backend nor remote operation. GTK and Qt support multiple backends and are not simply “Xorg libraries”.</li><li><code>dpkg -l | grep -E "libgtk|libqt|xserver"</code> filters rows by text: it mainly finds libraries/servers, not all applications using them, and can include states other than installed. A remote X server is not a forwarding requirement.</li></ul><p>Conclusion: find the candidate → check the command/package → observe X11 → test the GUI over SSH. None of these filters is a “mathematical certainty”.</p></div></details><details><summary>Deeper inspection: all launcher metadata</summary><div><p>Run as the user you are investigating. This searches common launcher locations, including Snap and Flatpak exports, and skips missing directories.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>for dir in /usr/share/applications /usr/local/share/applications \
+  &quot;$HOME/.local/share/applications&quot; /var/lib/snapd/desktop/applications \
+  /var/lib/flatpak/exports/share/applications \
+  &quot;$HOME/.local/share/flatpak/exports/share/applications&quot;; do
+  [ -d &quot;$dir&quot; ] || continue
+  grep -RHnE '^(Name|Exec|TryExec|Terminal|Type|Hidden|NoDisplay)=' \
+    &quot;$dir&quot; --include='*.desktop'
+done</code></pre></div>
+<p><code>Exec=</code> identifies the launch command; <code>Terminal=false</code> means no terminal is requested, not that the app uses X11. Fields such as <code>%U</code> and <code>%F</code> are launcher placeholders: do not blindly paste them into Bash. Secondary actions, duplicates and hidden launchers may appear; custom XDG paths and software without launchers can be missed.</p><p class="source">References: <a href="https://specifications.freedesktop.org/desktop-entry/latest/recognized-keys.html">Desktop Entry Specification · freedesktop.org</a></p>
+</div></details><h3>Complete the inventory: APT, Snap and Flatpak</h3>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>dpkg-query -W -f='${binary:Package}\t${db:Status-Status}\t${Version}\n' | \
+  awk -F '\t' '$2 == &quot;installed&quot; {print $1 &quot;\t&quot; $3}'
+if command -v snap &gt;/dev/null 2&gt;&amp;1; then snap list; fi
+if command -v flatpak &gt;/dev/null 2&gt;&amp;1; then flatpak list --app; fi</code></pre></div>
+<p>The list also includes software without a GUI. An APT package inventory does not automatically cover Snap, Flatpak, AppImage, programs in /opt or manual installations. For each candidate, record its name, version, source and command. Do not bulk-launch the Exec entries you find.</p>
+<details><summary>Deeper inspection: look for library clues</summary><div><p>Optional: install <code>binutils</code> and <code>file</code> for these commands. This example uses xclock; replace it with the executable you found.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>app_path=$(command -v xclock)
+if [ -n &quot;$app_path&quot; ]; then
+  file -L &quot;$app_path&quot;
+  readelf -d &quot;$app_path&quot; | grep NEEDED
+fi</code></pre></div><p><code>libX11</code>, <code>libxcb</code>, GTK or Qt are clues, not a verdict. readelf shows direct ELF dependencies, not all transitive or plugin-loaded ones. Scripts, wrappers and static binaries need different analysis; a “not an ELF file” error does not rule out a GUI. Avoid ldd on untrusted executables.</p><p class="source">References: <a href="https://manpages.ubuntu.com/manpages/jammy/man1/readelf.1.html">readelf(1) · Ubuntu Jammy</a></p></div></details>
+<details><summary>Use ldd only on a trusted executable</summary><div><p>After checking with file that the path is a trusted dynamic ELF executable, you can also inspect dependencies resolved by ldd. This example uses xclock; do not use a wrapper or an unknown file.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>app_path=$(command -v xclock)
+if [ -n &quot;$app_path&quot; ]; then
+  ldd &quot;$app_path&quot; | grep -Ei 'libX11|libxcb'
+fi</code></pre></div><p>A match indicates linked libraries, including indirect dependencies; no match does not rule out runtime-loaded plugins. It proves neither the need for nor compatibility with forwarding. Prefer static inspection with readelf for untrusted executables: ldd can cause code execution.</p><p class="source">References: <a href="https://manpages.ubuntu.com/manpages/jammy/man1/ldd.1.html">ldd(1) · Ubuntu Jammy</a></p></div></details>
+<h3>Example map</h3><p class="muted">Illustrative examples, not results from a scan of your system.</p>
+<div class="search-row js-only"><label for="search">Search examples<input type="search" id="search" placeholder="E.g. Qt, xclock, headless…"></label><div class="filters" role="group" aria-label="Filter by category"><button type="button" data-filter="all" aria-pressed="true">All</button><button type="button" data-filter="x11" aria-pressed="false">X11</button><button type="button" data-filter="conditional" aria-pressed="false">Verify first</button><button type="button" data-filter="none" aria-pressed="false">Without X11</button></div></div><p class="source js-only" id="search-count" role="status"></p><div class="catalog"><article class="card" data-category="x11"><span class="badge">X11</span><h3>xclock / xeyes</h3><p>Reference X11 clients. Useful for testing the tunnel; provided by x11-apps.</p></article><article class="card" data-category="x11"><span class="badge">X11</span><h3>xterm</h3><p>A terminal emulator with an X11 window. Its remote GUI uses forwarding.</p></article><article class="card" data-category="conditional"><span class="badge">VERIFY FIRST</span><h3>GTK 3 / Qt 5</h3><p>Possible X11 or Wayland backends. Check the application build, plugins and launch mode.</p></article><article class="card" data-category="conditional"><span class="badge">VERIFY FIRST</span><h3>Browsers / Electron</h3><p>Backends and sandboxes vary. A successful xclock test does not guarantee acceleration, audio or browser compatibility.</p></article><article class="card" data-category="none"><span class="badge">WITHOUT X11</span><h3>nano / top / grep</h3><p>Text applications: they run in an SSH terminal without X11 forwarding.</p></article><article class="card" data-category="none"><span class="badge">WITHOUT X11</span><h3>Native Wayland / headless mode</h3><p>Native Wayland does not travel through the X11 tunnel. A documented headless mode needs no window; assess these two modes separately.</p></article></div><p id="empty" hidden>No matching examples. Try another search or select All.</p></section>
+
+<section id="observe"><div class="section-heading"><span>04</span><h2>Observe X11</h2></div><p>To inspect applications already running, use a terminal <strong>inside the desktop you are investigating</strong>, as its user. An SSH session with forwarding may point to the client’s local display, not the remote machine’s physical desktop.</p>
+<div class="command"><div class="command-head"><span>TERMINAL ON THE DESKTOP TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>printf 'DISPLAY=%s\n' &quot;$DISPLAY&quot;
+xlsclients -l
+xprop WM_CLASS WM_NAME _NET_WM_PID WM_CLIENT_MACHINE</code></pre></div>
+<p>With xprop the pointer changes: click the window you want to identify. <code>WM_CLASS</code> helps identify the app; <code>_NET_WM_PID</code>, when present and correct, identifies a process on the computer named by <code>WM_CLIENT_MACHINE</code>. Do not use that PID on the wrong computer.</p>
+<div class="note"><strong>Important limitation.</strong> xlsclients is not a complete census: it depends on properties published by clients. It does not show native Wayland windows and may omit X11 clients. On Wayland, a window recognized by xprop uses X11 through Xwayland. Absence from the list does not prove an app is Wayland.</div><p class="source">References: <a href="https://manpages.ubuntu.com/manpages/jammy/man1/xlsclients.1.html">xlsclients(1) · Ubuntu Jammy</a> · <a href="https://manpages.ubuntu.com/manpages/jammy/man1/xprop.1.html">xprop(1) · Ubuntu Jammy</a> · <a href="https://wayland.freedesktop.org/docs/book/Xwayland.html">Xwayland · Wayland documentation</a></p>
+<details><summary>From a PID to the process and its environment</summary><div><p>On the computer running the process, replace 1234 with the verified PID. Inspect your own processes: permissions, containers and namespaces may limit visibility.</p>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>target_pid=1234
+ps -p &quot;$target_pid&quot; -o pid=,user=,comm=,args=
+readlink -f &quot;/proc/$target_pid/exe&quot;
+tr '\0' '\n' &lt; &quot;/proc/$target_pid/environ&quot; | \
+  grep -E '^(DISPLAY|WAYLAND_DISPLAY|GDK_BACKEND|QT_QPA_PLATFORM)='</code></pre></div><p>DISPLAY or WAYLAND_DISPLAY in the environment are only inherited clues: they prove neither a connection nor the backend actually used. The PID may have exited, been reused or not been published by the window.</p></div></details></section>
+
+<section id="verify"><div class="section-heading"><span>05</span><h2>Verify over SSH</h2></div><h3>1. Check the remote service</h3>
+<div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>command -v xauth
+sudo /usr/sbin/sshd -T | grep -E '^(x11forwarding|x11uselocalhost|disableforwarding|xauthlocation) '</code></pre></div>
+<p>Check for <code>x11forwarding yes</code>, <code>x11uselocalhost yes</code> and <code>disableforwarding no</code>. With Match rules, also use <code>sshd -T -C</code> with the actual user and addresses: the global configuration may not match your connection. SSH key restrictions may prohibit forwarding.</p>
+<details><summary>If the configuration needs adjustment</summary><div><p>The administrator should inspect /etc/ssh/sshd_config, included files and Match rules. Set X11Forwarding yes while keeping X11UseLocalhost yes where appropriate; do not blindly append duplicate directives. After editing, validate and reload the service:</p><div class="command"><div class="command-head"><span>UBUNTU HOST TO INSPECT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>sudo /usr/sbin/sshd -t &amp;&amp; sudo systemctl reload ssh</code></pre></div><p>Keep the current session open and test a new connection. Reloading does not add forwarding to an existing session.</p></div></details><p class="source">References: <a href="https://manpages.ubuntu.com/manpages/jammy/man5/sshd_config.5.html">sshd_config(5) · Ubuntu Jammy</a></p>
+<h3>2. Open the tunnel from your local computer</h3><p>From a local Ubuntu terminal with an X server available. Replace <code>user@host</code> with your destination. First check that DISPLAY is set on the client.</p>
+<div class="command"><div class="command-head"><span>SSH CLIENT · LOCAL COMPUTER · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>printf 'DISPLAY=%s\n' &quot;$DISPLAY&quot;
+ssh -X -o ForwardX11Trusted=no user@host</code></pre></div>
+<p>This explicitly requests untrusted forwarding. On Ubuntu/Debian, <code>-X</code> alone may already be trusted; do not infer the trust level from the letter alone. An application incompatible with the restrictions may need <code>ssh -Y</code>, for trusted hosts and applications only: it grants broad access to the local display.</p>
+<h3>3. Test a simple window</h3>
+<div class="command"><div class="command-head"><span>NEW SSH SESSION · REMOTE HOST · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>printf 'DISPLAY=%s\n' &quot;$DISPLAY&quot;
+xclock</code></pre></div>
+<p>A value such as <code>localhost:10.0</code> is typical, not mandatory. If the clock appears on your screen, the X11 path works for that client. Close it to return to the prompt. Do not manually set DISPLAY to <code>:0</code> or your computer’s IP: that would bypass the display prepared by SSH.</p><p class="source">References: <a href="https://manpages.ubuntu.com/manpages/jammy/man1/ssh.1.html">ssh(1) · Ubuntu Jammy</a></p>
+<h3>4. Test the candidate application</h3><p>In the same session, launch one trusted application using the command identified earlier. To avoid reusing an existing process, first close its instances after saving your work, or use the program’s documented new-instance option.</p>
+<div class="command"><div class="command-head"><span>SSH SESSION · EXAMPLES TO ADAPT · Bash</span><button class="copy js-only" type="button">Copy</button></div><pre tabindex="0" data-language="Bash"><code>GDK_BACKEND=x11 gtk_app_name
+QT_QPA_PLATFORM=xcb qt_app_name</code></pre></div>
+<p>The two lines are <strong>alternatives</strong> for GTK 3 and Qt 5: substitute a real command and run only the relevant one. They work when the build includes the backend and its dependencies. They do not globally change the desktop. D-Bus, sandboxes, graphics acceleration or existing instances can complicate launching.</p><p class="source">References: <a href="https://docs.gtk.org/gtk3/running.html">GTK 3 · Running applications</a> · <a href="https://doc.qt.io/archives/qt-5.15/qguiapplication.html">Qt 5 · QGuiApplication</a></p>
+<div class="table-wrap"><table><thead><tr><th>Observed outcome</th><th>Valid conclusion</th></tr></thead><tbody><tr><td>The GUI appears locally</td><td>Forwarding verified for this version, mode and session.</td></tr><tr><td>xclock works, the app does not</td><td>Investigate the app’s backend, dependencies and session; this does not prove it needs Wayland.</td></tr><tr><td>CLI/headless mode succeeds</td><td>That mode does not need forwarding, even if the program also offers a GUI.</td></tr></tbody></table></div></section>
+
+<section id="troubleshoot"><div class="section-heading"><span>06</span><h2>Troubleshoot</h2></div><details><summary>Empty DISPLAY or “Can’t open display”</summary><div>First check the local X server and DISPLAY, then reconnect with forwarding. Check xauth and the effective sshd configuration. For details use ssh -vv -X -o ForwardX11Trusted=no user@host. Logs may contain names and addresses: redact them before sharing.</div></details><details><summary>“Authorization required” or rejected X11 cookie</summary><div>Try as the SSH session user, without sudo when launching the GUI. Check ownership and permissions of the authorization file (XAUTHORITY, if set), then reconnect. Do not publish xauth cookies or use xhost + as a shortcut.</div></details><details><summary>The desktop uses Wayland and xlsclients shows little</summary><div>This is expected for native Wayland apps. xlsclients observes the selected X display, not the Wayland compositor. Try xprop on the window and check the application’s documented backend.</div></details><details><summary>“Could not load the Qt platform plugin xcb”</summary><div>Check the plugin dependencies and the Qt environment of that installation. This message alone does not prove a tunnel failure. Confirm xclock first and avoid mixing Qt libraries from different installations.</div></details><details><summary>It works initially, then new launches fail</summary><div>In untrusted mode, ForwardX11Timeout limits how long new X11 connections are accepted (upstream default: 20 minutes). Open a fresh session and inspect the client configuration. Also check for SSH disconnects and computer sleep.</div></details><details><summary>Snap, Flatpak, browsers or a slow GUI</summary><div>Check graphics permissions and limitations of the specific package, as well as D-Bus and acceleration. Do not disable the sandbox as a generic fix. X11 forwarding does not guarantee remote GPU support, audio or good performance over high-latency links; remote desktop software may fit better.</div></details><p class="source">For client options: <a href="https://manpages.ubuntu.com/manpages/jammy/man5/ssh_config.5.html">ssh_config(5) · Ubuntu Jammy</a></p></section>
+
+<section id="report"><div class="section-heading"><span>07</span><h2>Save your findings</h2></div><div class="tool-panel"><div class="check-top"><h3>Your investigation notebook</h3><span id="completion" class="js-only">0 / 5</span></div><p class="muted">Check only the steps you actually completed. Notes and progress stay in your browser when permitted; the exported report is your portable copy.</p><progress class="js-only" id="progress" max="5" value="0" aria-label="Completed checks"></progress><div class="checklist"><label><input type="checkbox" data-check="0">I checked the Ubuntu version and distinguished the remote host from the local computer.</label><label><input type="checkbox" data-check="1">I collected candidates without automatically launching every program.</label><label><input type="checkbox" data-check="2">I checked the correct display and identified an X11 window with xprop.</label><label><input type="checkbox" data-check="3">I opened xclock on my local computer from a fresh SSH session.</label><label><input type="checkbox" data-check="4">I tested the individual application and recorded its mode, version and outcome.</label></div><label for="notes" style="margin-top:20px">Application, version, backend, test and outcome</label><textarea id="notes" placeholder="E.g. xclock | x11-apps | X11 | untrusted SSH | local window OK. Record errors and limitations for other apps; do not enter cookies or credentials."></textarea><p id="storage-status" class="source js-only" role="status"></p><div class="report-actions js-only"><button type="button" id="export" class="primary">Export report .txt</button><button type="button" id="reset">Clear checks</button></div></div></section>
+<section id="sources"><div class="section-heading"><span>08</span><h2>Technical sources</h2></div><p>Primary sources consulted on September 21, 2026. Jammy manuals describe the Ubuntu 22.04 family; package updates may change details and settings. On the actual system, also consult man ssh, man sshd_config and man xprop.</p><div class="references"><a href="https://manpages.ubuntu.com/manpages/jammy/man1/ssh.1.html">ssh(1) · Ubuntu Jammy ↗</a><a href="https://manpages.ubuntu.com/manpages/jammy/man5/sshd_config.5.html">sshd_config(5) · Ubuntu Jammy ↗</a><a href="https://manpages.ubuntu.com/manpages/jammy/man1/xlsclients.1.html">xlsclients(1) · Ubuntu Jammy ↗</a><a href="https://manpages.ubuntu.com/manpages/jammy/man1/xprop.1.html">xprop(1) · Ubuntu Jammy ↗</a><a href="https://specifications.freedesktop.org/desktop-entry/latest/recognized-keys.html">Desktop Entry Specification · freedesktop.org ↗</a><a href="https://wayland.freedesktop.org/docs/book/Xwayland.html">Xwayland · Wayland documentation ↗</a><a href="https://docs.gtk.org/gtk3/running.html">GTK 3 · Running applications ↗</a><a href="https://doc.qt.io/archives/qt-5.15/qguiapplication.html">Qt 5 · QGuiApplication ↗</a><a href="https://manpages.ubuntu.com/manpages/jammy/man1/readelf.1.html">readelf(1) · Ubuntu Jammy ↗</a><a href="https://manpages.ubuntu.com/manpages/jammy/man1/dpkg-query.1.html">dpkg-query(1) · Ubuntu Jammy ↗</a><a href="https://manpages.ubuntu.com/manpages/jammy/man1/ldd.1.html">ldd(1) · Ubuntu Jammy ↗</a></div></section>
+<footer>LINUX FIELD GUIDE / X11 · English guide<br>Works offline; source links require Internet access. No commands are executed by the browser.</footer></main></div><div class="toast" id="toast" role="status" hidden></div>
+<script>const guideData={"lang":"en","checks":["I checked the Ubuntu version and distinguished the remote host from the local computer.","I collected candidates without automatically launching every program.","I checked the correct display and identified an X11 window with xprop.","I opened xclock on my local computer from a fresh SSH session.","I tested the individual application and recorded its mode, version and outcome."],"diagnostic":{"local":["Forwarding is unnecessary","If the application runs and displays on the same computer, check its local backend. X11 usage and X11 forwarding are different concerns."],"cli":["The SSH terminal is sufficient","Text or headless mode does not require X11 forwarding. Confirm that the application actually supports that mode."],"wayland":["X11 forwarding does not carry Wayland","If the application supports X11, test that backend. A Wayland-only application or a full desktop needs an appropriate remote-access solution."],"x11":["Candidate for X11 forwarding","To display this remote GUI locally through SSH, prepare the tunnel and test xclock first, then the individual application. An X11 backend alone does not guarantee compatibility."],"unknown":["Collect evidence before classifying","Find the Exec command, inspect the window with xprop and perform a controlled launch. An installed package or library is only a clue."]},"copy":"Copy","copied":"Command copied","manual":"Automatic copy unavailable: text selected. Use Ctrl+C or ⌘C.","matches":"examples found","saved":"Notes saved in this browser.","unsaved":"Local storage unavailable: export your report before closing.","download":"x11-report","notesTitle":"Verification notes","reportTitle":"X11 assessment · Ubuntu 22.04.5 LTS"};
+
+document.documentElement.classList.add('js');
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+const key = 'x11-field-guide-v1-' + guideData.lang;
+let persisted = {};
+let storageWorks = true;
+try { persisted = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch { storageWorks = false; }
+const checks = $$('[data-check]');
+checks.forEach((box, i) => box.checked = Array.isArray(persisted.checks) && persisted.checks[i] === true);
+$('#notes').value = typeof persisted.notes === 'string' ? persisted.notes : '';
+let theme = persisted.theme === 'dark' ? 'dark' : 'light';
+function setTheme() { document.documentElement.dataset.theme = theme; $('#theme').setAttribute('aria-pressed', String(theme === 'dark')); }
+setTheme();
+function save() {
+  try { localStorage.setItem(key, JSON.stringify({checks:checks.map(box => box.checked),notes:$('#notes').value,theme})); storageWorks = true; }
+  catch { storageWorks = false; }
+  $('#storage-status').textContent = storageWorks ? guideData.saved : guideData.unsaved;
+}
+function progress() { const n = checks.filter(box => box.checked).length; $('#progress').value = n; $('#completion').textContent = n + ' / ' + checks.length; }
+progress();
+$('#storage-status').textContent = storageWorks ? guideData.saved : guideData.unsaved;
+checks.forEach(box => box.addEventListener('change', () => { progress(); save(); }));
+$('#notes').addEventListener('input', save);
+$('#theme').addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; setTheme(); save(); });
+$('#reset').addEventListener('click', () => { checks.forEach(box => box.checked = false); progress(); save(); });
+function diagnose() {
+  const kind = $('#location').value === 'local' ? 'local' : $('#backend').value;
+  const [title, detail] = guideData.diagnostic[kind];
+  const strong = document.createElement('strong'); strong.textContent = title;
+  const p = document.createElement('p'); p.textContent = detail;
+  $('#diagnosis').replaceChildren(strong, p);
+}
+$('#location').addEventListener('change', diagnose); $('#backend').addEventListener('change', diagnose); diagnose();
+let filter = 'all';
+function search() {
+  const query = $('#search').value.toLocaleLowerCase(guideData.lang).trim(); let n = 0;
+  $$('.catalog .card').forEach(card => { const match = (filter === 'all' || card.dataset.category === filter) && card.textContent.toLocaleLowerCase(guideData.lang).includes(query); card.hidden = !match; if (match) n++; });
+  $('#search-count').textContent = n + ' ' + guideData.matches; $('#empty').hidden = n !== 0;
+}
+$('#search').addEventListener('input', search);
+$$('[data-filter]').forEach(button => button.addEventListener('click', () => { filter = button.dataset.filter; $$('[data-filter]').forEach(b => b.setAttribute('aria-pressed', String(b === button))); search(); })); search();
+let toastTimer;
+function toast(message) { clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').hidden = false; toastTimer = setTimeout(() => $('#toast').hidden = true, 5500); }
+$$('.copy').forEach(button => button.addEventListener('click', async () => {
+  const code = button.closest('.command').querySelector('code');
+  try { if (!navigator.clipboard) throw new Error('Clipboard unavailable'); await navigator.clipboard.writeText(code.textContent); toast(guideData.copied); }
+  catch { const range = document.createRange(); range.selectNodeContents(code); const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range); toast(guideData.manual); }
+}));
+$('#export').addEventListener('click', () => {
+  const lines = [guideData.reportTitle, new Date().toLocaleString(guideData.lang), '', ...checks.map((box,i) => (box.checked ? '[x] ' : '[ ] ') + guideData.checks[i]), '', guideData.notesTitle, $('#notes').value];
+  const blob = new Blob(['\uFEFF' + lines.join('\n')], {type:'text/plain;charset=utf-8'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = guideData.download + '.txt'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000);
+});
+let printState = [];
+window.addEventListener('beforeprint', () => { printState = $$('details').map(el => [el,el.open]); printState.forEach(([el]) => el.open = true); });
+window.addEventListener('afterprint', () => printState.forEach(([el,open]) => el.open = open));
+$('#print').addEventListener('click', () => window.print());
+if ('IntersectionObserver' in window) {
+  const observer = new IntersectionObserver(entries => { const entry = entries.find(item => item.isIntersecting); if (!entry) return; $$('.sidebar nav a').forEach(a => { if (a.hash === '#' + entry.target.id) a.setAttribute('aria-current','location'); else a.removeAttribute('aria-current'); }); }, {rootMargin:'-10% 0px -65% 0px',threshold:0});
+  $$('main section').forEach(section => observer.observe(section));
+}
+
+
+let inventoryRows = [];
+let inventoryRejected = 0;
+const inventoryItalian = guideData.lang === 'it';
+function renderInventory() {
+  const query = $('#inventory-search').value.toLocaleLowerCase(guideData.lang).trim();
+  const rows = inventoryRows.filter(row => row.join(' ').toLocaleLowerCase(guideData.lang).includes(query));
+  const fragment = document.createDocumentFragment();
+  for (const row of rows) {
+    const tr = document.createElement('tr');
+    for (const cell of row) { const td = document.createElement('td'); td.textContent = cell || '—'; tr.append(td); }
+    fragment.append(tr);
+  }
+  $('#inventory-body').replaceChildren(fragment);
+  $('#inventory-output').hidden = rows.length === 0;
+  $('#inventory-status').textContent = inventoryItalian
+    ? rows.length + ' / ' + inventoryRows.length + ' candidati visibili; ' + inventoryRejected + ' righe ignorate. Compatibilità X11 non verificata.'
+    : rows.length + ' / ' + inventoryRows.length + ' candidates shown; ' + inventoryRejected + ' rows ignored. X11 compatibility unverified.';
+}
+$('#inventory-load').addEventListener('click', () => {
+  const input = $('#inventory-input').value;
+  inventoryRows = []; inventoryRejected = 0; $('#inventory-body').replaceChildren(); $('#inventory-output').hidden = true;
+  if (input.length > 2000000) { $('#inventory-status').textContent = inventoryItalian ? 'Inventario troppo grande: limite 2 milioni di caratteri.' : 'Inventory too large: limit 2 million characters.'; return; }
+  const lines = input.replace(/^\uFEFF/, '').split(/\r?\n/).filter(line => line.trim());
+  if (lines.shift() !== 'Name\tExec\tTerminal\tTryExec\tDesktopFile') {
+    $('#inventory-status').textContent = inventoryItalian ? 'Intestazione TSV non valida. Copia il risultato completo del comando Inventario strutturato.' : 'Invalid TSV header. Copy the complete output of the Structured inventory command.'; return;
+  }
+  for (const line of lines) { const cells = line.split('\t'); if (cells.length === 5 && inventoryRows.length < 3000) inventoryRows.push(cells); else inventoryRejected++; }
+  renderInventory();
+});
+$('#inventory-search').addEventListener('input', renderInventory);
+</script></body></html>
